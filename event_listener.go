@@ -183,6 +183,79 @@ func (l *Listener) FilterProcesses(p []string) { l.processFilter = p }
 func (l *Listener) FilterEvents(e []Event) { l.eventFilter = e }
 
 func (l *Listener) passesFilters(process string, event Event) bool {
+  pfLen := len(l.processFilter)
+  efLen := len(l.eventFilter)
+  processPass := false
+  eventPass := false
+  
+  if pfLen == 0 && efLen == 0 {
+    // No filters set, everything is welcome
+    return true
+  }
+  
+  if pfLen > 0 {
+    for _, pName := range l.processfilter {
+      if pName == process {
+        // Process is in the acceptable filters
+        processPass = true
+        break
+      }
+    }
+  } else {
+    // No filters set for processes
+    processPass = true
+  }
+  
+  if efLen > 0 {
+    for _, fName := range l.eventFilter {
+      if fName == event {
+        // Event passes the filter
+        eventPass = true
+        break
+      }
+    }
+  } else {
+    // No filters for event types set
+    eventPass = true
+  }
+  
+  if processPass && eventPass {
+    return true
+  }
   return false
 }
 
+// Run this in a go-routine
+func (l *Listener) Listen() {
+  // Set up STDIN reader
+  input := bufio.NewReader(l.Stdin)
+  
+  var line string
+  var headers *HeaderToken
+  
+  for {
+    // Transition from ACKNOWLEDGED to READY state
+    l.Stdout.WriteString("READY\n")
+    
+    // Read header line and print it to stderr
+    line, _ = input.ReadString('\n')
+    l.Stderr.WriteString(line)
+    
+    //Build headers list from input
+    headers, _ = NewHeaderToken(line)
+    
+    // Read in body based on the length provided by the header
+    body := make([]byte, headers.length)
+    input.Read(body)
+    l.Stderr.WriteString(fmt.Sprintf("body (%s)\n", string(body)))
+    
+    // Push message into queue if they pass the specified filters
+    msg := NewEventMessage(headers, body)
+    if l.passesFilters(msg.AsMap()["processname"], headers.EventName) {
+      l.messages <- msg
+    }
+    
+    // Transition from READY to ACKNOWLEDGED state
+    l.Stdout.WriteString("RESULT 2\nOK")
+  }
+}
