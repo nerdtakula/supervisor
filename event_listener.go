@@ -2,7 +2,6 @@ package supervisor
 
 import (
   "bufio"
-  "errors"
   "fmt"
   "os"
   "reflect"
@@ -154,3 +153,36 @@ func (t *HeaderToken) setField(name string, value interface{}) error {
   structFieldValue.Set(val)
   return nil
 }
+
+type Listener struct {
+  Stdin         *os.File
+  Stdout        *os.File
+  Stderr        *os.File
+  processFilter []string
+  eventFilter   []Event
+  messages      chan EventMessage
+}
+
+func NewListener() *Listener {
+  return &Listener{
+    Stdin:         os.Stdin,
+    Stdout:        os.Stdout,
+    Stderr:        os.Stderr,
+    processFilter: make([]string, 0),
+    eventFilter:   make([]Event, 0),
+    messages:      make(chan EventMessage, 1000),
+  }
+}
+
+func (l *Listener) Messages() chan EventMessage { return l.messages }
+
+// Filter to specific process names
+func (l *Listener) FilterProcesses(p []string) { l.processFilter = p }
+
+// filter to specific event types
+func (l *Listener) FilterEvents(e []Event) { l.eventFilter = e }
+
+func (l *Listener) passesFilters(process string, event Event) bool {
+  return false
+}
+
