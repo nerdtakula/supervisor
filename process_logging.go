@@ -42,4 +42,10 @@ func (c Client) TailProcessStderr(name string, offset, length int) (string, erro
 
 // Clear the stdout and stderr logs for the specified process and reopen them
 func (c Client) ClearProcessLogs(name string) error {
+  return c.makeRequest("supervisor.clearProcessLogs", []interface{}{name}, nil)
+}
+
+// Clear all process log files
+func (c Client) ClearAllProcessLogs() error {
+  return c.makeRequest("supervisor.clearAllProcessLogs", nil, nil)
 }
