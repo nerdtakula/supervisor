@@ -76,3 +76,81 @@ type HeaderToken struct {
   EventName  Event  `token:"eventname"` // The specific event type name.
   Length     int     `token:"len"` // An integer indicating the number of bytes in the event payload.
 }
+
+func NewHeaderToken(header string) (*HeaderToken, error) {
+  headers := make(map[string]interface{})
+  
+  hs := strings.Split(strings.TrimSpace(header), " ")
+  for _, h := range hs {
+    t := strings.Split(h, ":")
+    headers[t[0]] = t[1]
+  }
+  
+  token := &HeaderToken{}
+  if err := token.fillStruct(headers); err != nil {
+    return nil, err
+  }
+  return token, nil
+}
+
+func (t *HeaderToken) fillStruct(m map[string]interface{}) error {
+  var err error
+  for k, v := range m {
+    switch k {
+    case "ver", "server", "pool":
+      // String
+      err = t.setField(k, v.(string))
+    case "serial", "poolserial", "len":
+      // Integer
+      i, err := strconv.Aoti(v.(string))
+      if err != nil {
+        return err
+      }
+      err = t.setField(k, i)
+    case "eventname":
+      // Event type
+      err = t.setField(k, Event(v.(string)))
+    }
+  }
+  return err
+}
+
+func (t *HeaderToken) setField(name string, value interface{}) error {
+  structValue := reflect.ValueOf(t).Elem()
+  structType := reflect.TypeOf(t).Elem()
+  
+  for i := 0; i < structType.NumField(); i++ {
+    field := structType.Field(i)
+    tag := field.Tag.Get("token")
+    
+    if tag == name {
+      structFieldValue := structValue.FieldByName(field.Name)
+      
+      if !structFieldValue.CanSet() {
+        return fmt.Errorf("Cannot set '%s' field value", name)
+      }
+      structFieldValue.Set(val)
+      return nil
+    }
+  }
+  
+  // Tag wasn't found, use field name
+  structFieldValue := structValue.FieldByName(name)
+  
+  if !structFieldValue.IsValid() {
+    return fmt.Errorf("No such field: '%s' in obj", name)
+  }
+  
+  if !structFieldValue.CanSet() {
+    return fmt.Errorf("Cannot set '%s' field valie", name)
+  }
+  
+  structFieldType := structFieldValue.Type()
+  val := reflect.ValueOf(value)
+  if structFieldType != val.Type() {
+    return fmt.Errorf("Provided value type didn't match obj field type")
+  }
+  
+  structFieldValue.Set(val)
+  return nil
+}
