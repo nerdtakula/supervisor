@@ -60,7 +60,7 @@ func (e EventMessage) AsMap() map[string]string {
 
 	body := strings.Split(strings.TrimSpace(e.String()), " ")
 	for _, s := range body {
-		t := strings.Splits(s, ":")
+		t := strings.Split(s, ":")
 		data[t[0]] = t[1]
 	}
 	return data
@@ -101,7 +101,7 @@ func (t *HeaderToken) fillStruct(m map[string]interface{}) error {
 			err = t.setField(k, v.(string))
 		case "serial", "poolserial", "len":
 			// Integer
-			i, err := strconv.Aoti(v.(string))
+			i, err := strconv.Atoi(v.(string))
 			if err != nil {
 				return err
 			}
@@ -201,7 +201,7 @@ func (l *Listener) passesFilters(process string, event Event) bool {
 	}
 
 	if pfLen > 0 {
-		for _, pName := range l.processfilter {
+		for _, pName := range l.processFilter {
 			if pName == process {
 				// Process is in the acceptable filters
 				processPass = true
@@ -252,7 +252,7 @@ func (l *Listener) Listen() {
 		headers, _ = NewHeaderToken(line)
 
 		// Read in body based on the length provided by the header
-		body := make([]byte, headers.length)
+		body := make([]byte, headers.Length)
 		input.Read(body)
 		l.Stderr.WriteString(fmt.Sprintf("body (%s)\n", string(body)))
 
