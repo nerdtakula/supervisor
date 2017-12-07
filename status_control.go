@@ -11,7 +11,7 @@ func (c Client) ApiVersion() (string, error) {
 }
 
 // Return the version of the supervisor package in use by supervisord
-func (c Client) SupervisorVersion() (sting, error) {
+func (c Client) SupervisorVersion() (string, error) {
 	var result string
 	err := c.makeRequest("supervisor.getSupervisorVersion", nil, &result)
 	if err != nil {
