@@ -1,5 +1,10 @@
 package supervisor
 
+const (
+	GROUPS_ADDED	=	"PROCESS_GROUPS_ADDED"
+	GROUPS_CHANGED	=	"PROCESS_GROUPS_CHANGED"
+	GROUPS_REMOVED	=	"PROCESS_GROUPS_REMOVED"
+)
 // Get info about a specific process
 func (c Client) GetProcessInfo(name string) (*ProcessInfo, error) {
 	result := &ProcessInfo{}
@@ -96,15 +101,52 @@ func (c Client) SendProcessStdin(name, chars string) error { return nil }
 // subscribing to the 'RemoteCommunicationEvent'
 func (c Client) SendRemoteCommEvent(t, data string) error { return nil }
 
-// Reload the configuration
-func (c Client) ReloadConfig() ([][][]string, error) {
-	result := make([][][]string, 0)
-	err := c.makeRequest("supervisor.reloadConfig", nil, &result)
+// Reload the configuration ( supervisorctl reread )
+func (c Client) ReloadConfig() (map[string][]string, error) {
+	result1 := make([][][]string, 0)
+	result2 := make(map[string][]string, 0)
+
+	err := c.makeRequest("supervisor.reloadConfig", nil, &result1)
 
 	if err != nil {
 		return nil, err
 	}
-	return result, nil
+
+	result2[GROUPS_ADDED] = result1[0][0]
+	result2[GROUPS_CHANGED] = result1[0][1]
+	result2[GROUPS_REMOVED] = result1[0][2]
+
+	return result2, nil
+}
+
+// Alternative for supervisorctl update
+func (c Client) Update() error {
+	data, err := c.ReloadConfig()
+
+	if err != nil {
+		return err
+	}
+
+	start := append(data[GROUPS_ADDED], data[GROUPS_CHANGED]...)
+	stop := append(data[GROUPS_CHANGED], data[GROUPS_REMOVED]...)
+
+	for _, name := range stop {
+		if _, err := c.StopProcessGroup(name, true); err != nil {
+			return err
+		}
+
+		if _, err := c.RemoveProcessGroup(name); err != nil {
+			return err
+		}
+	}
+
+	for _, name := range start {
+		if _, err := c.AddProcessGroup(name); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // Update the config for a running process from the configuration file
