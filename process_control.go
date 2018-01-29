@@ -97,9 +97,10 @@ func (c Client) SendProcessStdin(name, chars string) error { return nil }
 func (c Client) SendRemoteCommEvent(t, data string) error { return nil }
 
 // Reload the configuration
-func (c Client) Reload() (map[string]interface{}, error) {
-	result := make(map[string]interface{})
+func (c Client) ReloadConfig() ([][][]string, error) {
+	result := make([][][]string, 0)
 	err := c.makeRequest("supervisor.reloadConfig", nil, &result)
+
 	if err != nil {
 		return nil, err
 	}
