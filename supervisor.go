@@ -70,7 +70,7 @@ func (c Client) url() string {
 }
 
 func (c Client) makeRequest(method string, args, result interface{}) error {
-  var transport *http.Transport
+  var transport http.RoundTripper
 
   if c.isUnixDomain() {
     // unix-domain socket connection
