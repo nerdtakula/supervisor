@@ -15,6 +15,6 @@ func TestSignalProcessGroup(t *testing.T)  { t.Skip("Not Implemented") }
 func TestSignalAllProcesses(t *testing.T)  { t.Skip("Not Implemented") }
 func TestSendProcessStdin(t *testing.T)    { t.Skip("Not Implemented") }
 func TestSendRemoteCommEvent(t *testing.T) { t.Skip("Not Implemented") }
-func TestReloadConfig(t *testing.T)              { t.Skip("Not Implemented") }
+func TestReloadConfig(t *testing.T)        { t.Skip("Not Implemented") }
 func TestAddProcessGroup(t *testing.T)     { t.Skip("Not Implemented") }
 func TestRemoveProcessGroup(t *testing.T)  { t.Skip("Not Implemented") }
