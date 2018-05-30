@@ -1,6 +1,8 @@
 package supervisor
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestNewHeaderToken(t *testing.T) {
 	// Arrange
@@ -18,6 +20,6 @@ func TestNewHeaderToken(t *testing.T) {
 	assertEqual(t, 21, token.Serial, "")
 	assertEqual(t, "listener", token.Pool, "")
 	assertEqual(t, 10, token.PoolSerial, "")
-	assertEqual(t, EVENT_PROCESS_COMMUNICATION_STDOUT, token.EventName, "")
+	assertEqual(t, Event(EVENT_PROCESS_COMMUNICATION_STDOUT).String(), token.EventName.String(), "")
 	assertEqual(t, 54, token.Length, "")
 }

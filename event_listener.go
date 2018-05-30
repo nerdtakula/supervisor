@@ -41,6 +41,8 @@ const (
 	EVENT_PROCESS_GROUP_REMOVED                  = "PROCESS_GROUP_REMOVED"
 )
 
+func (e Event) String() string { return string(e) }
+
 type EventMessage struct {
 	Headers *HeaderToken
 	Body    []byte

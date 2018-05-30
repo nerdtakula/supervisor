@@ -20,7 +20,7 @@ func assertEqual(t *testing.T, expected, result interface{}, message string) {
 	}
 
 	if message == "" {
-		message = fmt.Sprintf("%v != %v", expected, result)
+		message = fmt.Sprintf("Expected: '%+v', Got: '%+v'", expected, result)
 	}
 	t.Fatal(message)
 }
