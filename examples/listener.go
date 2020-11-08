@@ -1,11 +1,11 @@
 package main
 
-import {
+import (
   "fmt"
   "os"
   
   "github.com/nerdtakula/supervisor"
-}
+)
 
 func main() {
   client := supervisor.New("localhost", 9001, "admin", "admin")
@@ -20,6 +20,6 @@ func main() {
     //stdout, _ := client.ReadProcessStdout(processName, 0, 2000)
     stderr, _ := client.ReadProcessStderr(processName, 0, 2000)
     
-    fmt.Fprintf(os.Stderr, "STDERR:\n%s\n", stderr")
+    fmt.Fprintf(os.Stderr, "STDERR:\n%s\n", stderr)
   }
 }
